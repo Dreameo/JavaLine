@@ -612,6 +612,89 @@ spring:
 
 
 
+#### 4.5 视图解析和模板引擎
+
+> 因为Springboot默认打包方式是jar，jsp是不支持在压缩包里编译的，因此Springboot默认不支持jsp，需要引入第三方模板引擎技术实现页面实现
+
+> AdminEx后台管理模板，基于SpringBoot实现功能
+
+##### 4.5.1 引入静态资源
+
+> 下载网址：https://gitee.com/coderdlg/adminexhttps://gitee.com/coderdlg/adminex
+
+##### 4.5.2 登录与首页
+
+> 是否登录，一般使用拦截器或者过滤器
+
+thymeleaf文本行内写法：<p>Hello, [[${session.user.name}]]!</p>
+
+##### 4.5.3 抽取公共部分
+
+> 分析公共部分-->进行抽取
+
+
+
+拦截器：
+
+> 使用步骤：1. 配置拦截器要拦截哪些请求  2. 把这些配置放在容器中
+
+> 拦截器配了/**，静态资源请求也会被篮球
+
+SpringBoot中使用拦截器：
+
+1. 编写一个拦截器实现HandlerInterceptor接口
+2. 拦截器注册到容器中（实现webmvcconfigurer的addInterceptor方法）
+3. 指定拦截规则，如果是拦截所有，静态资源也会被拦截，
+
+
+
+文件上传：(多文件上传在input中加上属性multiple)
+
+> ```html
+> <form role="form" th:action="@{/upload}" method="post" enctype="multipart/form-data">
+> ```
+
+> 文件上传有默认最大限制，所以可以在配置文件中进行配置。
+
+
+
+> 异常处理机制
+
+![image-20220327212412432](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/error.png)
+
+> SpringBoot在error目录下4xx/5xx可以自定义页面
+
+
+
+
+
+web三大原生注解注入(Servlet/Filter/Listener)
+
+第一种方式：
+
+@ComponetScan和各组件的组件的原生注解一起使用
+
+> 拦截请求路径区别/*是servlet的写法，而/**是Spring的写法，表示拦截所有
+
+第二中方式：
+
+RegistrationBean
+
+![image-20220327214552350](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/RegistBean.png)
+
+> 细节：
+>
+> 1. 在这个配置类上写上（proxyBeanMethods = false）功能不会出现问题，但是会出现会出现冗余的组件因此应该保证单实例（proxyBeanMethods=true)
+> 2. 为什么我们自己写的原生Servlet请求，没有经过Spring拦截器？
+
+![image-20220327220054012](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/DispatcherServlet-TomcatServlet.png)
+
+
+
+
+
+定制开发：
+
 
 
 
@@ -622,3 +705,12 @@ spring:
 页面开发，cookie禁用了，session里面的内容怎么使用；
 
 路径重写传递jsessionid, 把cookie的值使用矩阵变量的方式传递。
+
+
+
+### 5、数据访问
+
+> SpringBoot默认数据源
+
+> Druid数据源
+
