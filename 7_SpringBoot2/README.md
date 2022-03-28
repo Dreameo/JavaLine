@@ -341,21 +341,37 @@ public @interface EnableAutoConfiguration {
 
 - @AutoConfigrationPackage
 
+  > 自动配置包：指定默认的包规则
+
 ```java
-@Import({Registrar.class}) // 给容器中导入一个组件（Registrar.class）, 点进去查看源代码
-public @interface AutoConfigurationPackage {} 
+// 给容器中导入一个组件（Registrar.class）, 点进去查看源代码
+@Import(AutoConfigurationPackages.Registrar.class)
+public @interface AutoConfigurationPackage { //利用Registrar给容器中导入一系列组件
+//将指定的一个包下的所有组件导入进来？MainApplication 所在包下。
 ```
 
 ```java
 // 利用Registrar导入一系列组件：
 public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
     AutoConfigurationPackages.register(registry, (String[])(new AutoConfigurationPackages.PackageImports(metadata)).getPackageNames().toArray(new String[0])); // 将指定一个包的所有组件导入进来
+    
 }
 ```
 
-![image-20220325214526397](https://raw.githubusercontent.com/Dreameo/JavaLine/master/7_SpringBoot2/imgs/autoconfigurationPackage.png)
+![image-20220328122917779](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/%2540autoConfigurationPage.png)
+
+![image-20220325214526397](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/autoconfigurationPackage.png)
 
 - @Import({AutoConfigurationImportSelector.class})  // 导入组件
+
+```text
+1、利用getAutoConfigurationEntry(annotationMetadata);给容器中批量导入一些组件
+2、调用List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes)获取到所有需要导入到容器中的配置类
+3、利用工厂加载 Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader)；得到所有的组件
+4、从META-INF/spring.factories位置来加载一个文件。
+	默认扫描我们当前系统里面所有META-INF/spring.factories位置的文件
+    spring-boot-autoconfigure-2.3.4.RELEASE.jar包里面也有META-INF/spring.factories
+```
 
 ```java
 @Override
@@ -376,28 +392,285 @@ public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionR
 > 虽然我们127个场景的所有自动配置启动的时候默认全部加载。xxxxAutoConfiguration
 > 按照条件装配规则（@Conditional），最终会按需配置。
 
+> 修改默认配置(文件上传解析器)
+
 ```java
-1、利用getAutoConfigurationEntry(annotationMetadata);给容器中批量导入一些组件
-2、调用List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes)获取到所有需要导入到容器中的配置类
-3、利用工厂加载 Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader)；得到所有的组件
-4、从META-INF/spring.factories位置来加载一个文件。
-	默认扫描我们当前系统里面所有META-INF/spring.factories位置的文件
-    spring-boot-autoconfigure-2.3.4.RELEASE.jar包里面也有META-INF/spring.factories
-    
+@Bean
+@ConditionalOnBean(MultipartResolver.class)  //容器中有这个类型组件
+@ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME) //容器中没有这个名字 multipartResolver 的组件
+public MultipartResolver multipartResolver(MultipartResolver resolver) { // 默认去容器中找，给@Bean标注的方法传入了对象参数，这个参数的值就会从容器中找。 找MultipartResolver的对象传入进去。
+    //给@Bean标注的方法传入了对象参数，这个参数的值就会从容器中找。
+    //SpringMVC multipartResolver。防止有些用户配置的文件上传解析器不符合规范
+    // Detect if the user has created a MultipartResolver but named it incorrectly
+    return resolver;
+}
+// 给容器中加入了文件上传解析器；
+
 ```
 
 总结：
 
 - SpringBoot先加载所有的自动配置类  xxxxxAutoConfiguration
-- 每个自动配置类按照条件进行生效，默认都会绑定配置文件指定的值。xxxxProperties里面拿。xxxProperties和配置文件进行了绑定
+- 每个自动配置类按照条件进行生效，默认都会绑定配置文件指定的值(@EnableConfigurationProperties)。xxxxProperties(@ConfigurationProperties(prefix=""))里面拿。xxxProperties和配置文件进行了绑定
 - 生效的配置类就会给容器中装配很多组件
 - 只要容器中有这些组件，相当于这些功能就有了
 - 定制化配置
 
-- - 用户直接自己@Bean替换底层的组件
+- - **用户直接自己@Bean替换底层的组件**
   - 用户去看这个组件是获取的配置文件什么值就去修改。
 
 <font color='red'>**xxxxxAutoConfiguration ---> 组件  --->** **xxxxProperties里面拿值  ----> application.properties**</font>
+
+
+
+> 欢迎页：
+
+HandlerMapping:SpringMVC核心组件,处理器映射。保存了每一个Handler能处理哪些请求。
+
+> Restful风格
+
+```java
+@Bean
+@ConditionalOnMissingBean(HiddenHttpMethodFilter.class)
+@ConditionalOnProperty(prefix = "spring.mvc.hiddenmethod.filter", name = "enabled") // 要在配置文件中手动开启
+public OrderedHiddenHttpMethodFilter hiddenHttpMethodFilter() {
+   return new OrderedHiddenHttpMethodFilter();
+}
+
+```
+
+```yaml
+spring:
+	mvc:
+		hiddenmethod:
+			filter:
+				enabled: true # 开启页面表单RestFul风格
+```
+
+Rest原理（表单提交要使用REST的时候）
+
+- 表单提交会带_b_method=PUT
+- 请求过来被HiddenHttpMethodFilter拦截
+  - 请求是否正常，并且是POST
+  - 兼容以下请求；PUT.DELETE.PATCH
+  - 原生request (post) ,包装模式requesWrapper（HttpMethodRequestWrapper）重写了getMethod方法，返回的是 传入的值。
+  - 过滤器链放行的时候用wrapper。以后的方法调用getMethod是调用 requesWrapper的。 filterChain.doFilter(requestToUse, response);
+
+```java
+if ("POST".equals(request.getMethod()) && request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) == null) {
+   String paramValue = request.getParameter(this.methodParam);
+   if (StringUtils.hasLength(paramValue)) {
+      String method = paramValue.toUpperCase(Locale.ENGLISH);
+      if (ALLOWED_METHODS.contains(method)) {
+         requestToUse = new HttpMethodRequestWrapper(request, method);
+      }
+   }
+}
+```
+
+> Rest使用客户端工具:
+
+如：PostMan直接发送Put、 delete等方式请求，无需Filter。
+
+
+
+> 请求映射原理 SpringMVC功能分析都是从DispatcherSevlet  --> doDispatch() 每个请求都会调用doDispatch()
+
+![image-20220328143250526](https://raw.githubusercontent.com/Dreameo/JavaLine/master/5_SSM/2_SpringMVC/imgs/DispatcherServlet-doDispatch.png)
+
+
+
+RequestMappingHandlerMapping保存了所有@RequestMapping 和handler的映射规则
+
+![image-20220328152025661](https://raw.githubusercontent.com/Dreameo/JavaLine/master/7_SpringBoot2/imgs/image-20220328152025661.png)
+
+```text
+1、HandlerMapping作用(有很多类型的HandlerMapping)：根据请求的url、method等信息查找Handler，即控制器方法 ,将请求跟controller方法映射
+2、doDispath方法中得到当前请求的Handler(控制器)/在DispatcherServlet的控制下Handler对具体的用户请求进行处理
+3、通过HandlerAdapter对处理器（控制器方法）进行执行
+4、执行完成之后返回一个ModeAndView
+
+SpringBoot自动配置欢迎页的 WelcomePageHandlerMapping 。访问 /能访问至!Jindex.html;
+SpringBoot自动配置了默认的 RequestMappingHandlerMapping
+请求进来，挨个尝试所有的HandlerMapping看是否有请求信息。
+	如果有就找这个请求对应的handler
+	如果没有就是下一个 HandlerMapping
+我们需要一些自定义的映射处理，我们也可以自己给容器中放HandlerMapping。自定义HandlerMapping
+```
+
+> 参数注解：
+>
+> @PathVariablev @RequestHeaderN @ModelAttribute、 @RequestParams @MatrixVariableN @CookieValue、@RequestBody
+
+
+
+> @PathVariable 如果方法参数是Map，那么会将路径中的所有变量添加到map中。
+
+![image-20220328164449779](https://raw.githubusercontent.com/Dreameo/JavaLine/master/7_SpringBoot2/imgs/pathvariable-map.png)
+
+> @RequestParams 同理 
+
+![](https://raw.githubusercontent.com/Dreameo/JavaLine/master/7_SpringBoot2/imgs/%2540CookieValue.png)
+
+<font color='red'>问题：谷歌浏览器一直出不了cookie</font>
+
+> 矩阵参数@MatrixVariable
+
+<font color='red'>面试题：</font>
+页面开发，cookie禁用了，session里面的内容怎么使用；
+
+路径重写传递jsessionid, 把cookie的值使用矩阵变量的方式传递。分号前面是真正的请求，分号后面是携带的是矩阵变量。
+
+```text
+/cars/{path}?xxx=xxx&aaa=ccc    queryString</ 查询字符串。@RequestParam；<br/>
+/cars/sell;low=34;brand=byd,audi,yd  ；矩阵变量 <br/>
+页面开发，cookie禁用了，session里面的内容怎么使用；
+session.set(a,b)---> jsessionid ---> cookie ----> 每次发请求携带。
+url重写：/abc;jsesssionid=xxxx 把cookie的值使用矩阵变量的方式进行传递.
+```
+
+
+
+要实现MatrixVariable我们要定制化组件（加入组件）：两种写法
+
+```java
+@Configuration(proxyBeanMethods = false)
+public class WebConfig implements WebMvcConfigurer {
+
+    @Bean // 改变默认的隐藏HTTP参数
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter(){
+        HiddenHttpMethodFilter methodFilter = new HiddenHttpMethodFilter();
+        methodFilter.setMethodParam("_m");
+        return methodFilter;
+    }
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        UrlPathHelper urlPathHelper = new UrlPathHelper();
+        // 不移除；后面的内容。矩阵变量功能就可以生效
+        urlPathHelper.setRemoveSemicolonContent(false);
+        configurer.setUrlPathHelper(urlPathHelper);
+}
+
+```
+
+
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+    UrlPathHelper urlPathHelper = new UrlPathHelper();
+    // 不移除；后面的内容。矩阵变量功能就可以生效
+    urlPathHelper.setRemoveSemicolonContent(false);
+    configurer.setUrlPathHelper(urlPathHelper);
+    }
+
+
+
+
+
+
+
+```java
+//1、语法： 请求路径：/cars/sell;low=34;brand=byd,audi,yd
+//2、SpringBoot默认是禁用了矩阵变量的功能
+		//手动开启：原理。对于路径的处理。UrlPathHelper进行解析。
+				//(移除分号内容）支持矩阵变量的removeSemicolonContent
+		//3、矩阵变量必须有url路径变量才能被解析
+    
+@GetMapping("/cars/{path}")
+public Map carsSell(@MatrixVariable("low")Integer low,
+@MatrixVariable("brand")List〈String〉brand,
+@PathVariable("path")String path){
+
+```
+
+
+
+> 参数处理原理：(@RequstMapping例子)
+
+- HandlerMapping中找到能处理请求的Handler (Controller.methodO) 
+- 为当前Handler 找一个适配器 HandlerAdapter; <font color='red'>RequestMappingHandlerAdapter</font>
+-  适配器执行目标方法并确定方法参数的每一个值
+
+```JAVA
+//1. 找到能处理的适配器（循环找到）RequestMappingHandlerAdapter
+
+// 2. Actually invoke the handler.真正处理
+mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+// 3. RequestMappingHandlerAdapter类中处理Handler方法
+mav = invokeHandlerMethod(request, response, handlerMethod);
+
+// 调用
+invocableMethod.invokeAndHandle(webRequest, mavContainer);
+
+// 3. 真正执行方法： ServletInvocableHandlerMethod.java类 确定每个参数的值是多少
+Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+
+```
+
+
+
+> 确定将要执行的目标方法的每一个参数的值是什么； SpringMVC目标方法能写多少种参数类型。取决于参数解析器。
+
+参数解析器：
+
+![image-20220328184010857](https://raw.githubusercontent.com/Dreameo/JavaLine/master/7_SpringBoot2/imgs/parameter_resolver.png)
+
+
+
+> 当前解析器是否支持解析这种参数 • 支持就调用 resolveArgument
+
+
+
+> Servlet API   WebRequest、ServletRequest、MultipartRequest、 HttpSession、 javax.servlet.http.PushBuilder、Principal、InputStream、Reader、HttpMethod、 Locale、 TimeZone、Zoneld
+
+ServletRequestMethodArgumentResolver 以上的部分参
+
+```java
+@Override
+	public boolean supportsParameter(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType();
+		return (WebRequest.class.isAssignableFrom(paramType) ||
+				ServletRequest.class.isAssignableFrom(paramType) ||
+				MultipartRequest.class.isAssignableFrom(paramType) ||
+				HttpSession.class.isAssignableFrom(paramType) ||
+				(pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) ||
+				(Principal.class.isAssignableFrom(paramType) && !parameter.hasParameterAnnotations()) ||
+				InputStream.class.isAssignableFrom(paramType) ||
+				Reader.class.isAssignableFrom(paramType) ||
+				HttpMethod.class == paramType ||
+				Locale.class == paramType ||
+				TimeZone.class == paramType ||
+				ZoneId.class == paramType);
+	}
+```
+
+
+
+
+
+> 响应json
+
+```java
+	<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+        
+    //web场景自动引入了json场景
+    <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-json</artifactId>
+    <version>2.3.4.RELEASE</version>
+    <scope>compile</scope>
+    </dependency>
+```
+
+
+
+
+
+
 
 ### 2.5 开发小技巧
 
@@ -700,11 +973,6 @@ RegistrationBean
 
 
 
-
-面试题：
-页面开发，cookie禁用了，session里面的内容怎么使用；
-
-路径重写传递jsessionid, 把cookie的值使用矩阵变量的方式传递。
 
 
 
