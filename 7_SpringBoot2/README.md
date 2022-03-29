@@ -978,7 +978,132 @@ RegistrationBean
 
 ### 5、数据访问
 
+#### 5.1 数据源
+
 > SpringBoot默认数据源
 
 > Druid数据源
+
+
+
+#### 5.2 mybatis
+
+加入mybatis-spring starter
+
+> 配置模式
+
+```java
+// Mybatis自动配置类，因此再全局配置文件中以前缀mybatis进行配置
+@EnableConfigurationProperties(MybatisProperties.class) ： MyBatis配置项绑定类。
+@AutoConfigureAfter({ DataSourceAutoConfiguration.class, MybatisLanguageDriverAutoConfiguration.class })
+public class MybatisAutoConfiguration{}
+
+@ConfigurationProperties(prefix = "mybatis")
+public class MybatisProperties
+```
+
+
+
+```yaml
+# 可以修改配置文件中 mybatis 开始的所有；
+mybatis:
+#  config-location: classpath:mybatis/mybatis-config.xml  # 这个mybatis配置文件可以忽略不写，再configuration中进行配置（比如驼峰、懒加载之类的配置可以再configuration中进行配置）
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.yfh.boot.pojo.*
+```
+
+
+
+```java
+@Mapper // Mapper接口需要注明Mapper注解
+public interface UserMapper {
+    User getUserById(Integer id);
+}
+
+```
+
+```java
+// 测试，service根据mapper接口写
+@Autowired
+UserService userService;
+
+@Test
+public void testUserMapper() {
+    User user = userService.getUserById(1);
+    System.out.println(user);
+}
+```
+
+
+
+
+
+> 注解模式 ， 查询条件简单可以使用这种方式
+
+```java
+@Mapper
+public interface UserMapper {
+
+    @Select("select * from t_user where id=#{id}")
+    public User getById(Integer id);
+
+    public void insert(User user);
+
+}
+```
+
+
+
+> 混合模式，当查询语句有简单有复杂时，可以使用这种方式，就是mapper映射文件也存在，注解模式也存在。
+
+如果接口比较多，可以在主程序中加入注解简化：@MapperScan("com.yfh.boot.mapper") 
+
+
+
+#### 5.3 mybatis-plus
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+    <version>3.4.1</version>
+</dependency>
+```
+
+- MybatisPlusAutoConfiguration 配置类，MybatisPlusProperties 配置项绑定。**mybatis-plus：xxx 就是对****mybatis-plus的定制**
+- **SqlSessionFactory 自动配置好。底层是容器中默认的数据源**
+- **mapperLocations 自动配置好的。有默认值。****classpath\*:/mapper/\**/\*.xml；任意包的类路径下的所有mapper文件夹下任意路径下的所有xml都是sql映射文件。  建议以后sql映射文件，放在 mapper下**
+- **容器中也自动配置好了** **SqlSessionTemplate**
+- **@Mapper 标注的接口也会被自动扫描；建议直接** @MapperScan(**"com.atguigu.admin.mapper"**) 批量扫描就行
+- 只需要我们的Mapper继承 **BaseMapper** 就可以拥有crud能力
+
+
+
+**classpath和classpath*区别：**
+
+参考：https://www.cnblogs.com/vickylinj/p/9475990.html
+
+```xm
+<bean id="sessionFactorySaas" class="org.mybatis.spring.SqlSessionFactoryBean">  
+        <property name="dataSource" ref="dataSourceSaasdb"/>
+        <!-- mapper和resultmap配置路径 -->
+        <property name="mapperLocations" value="classpath*:mapper/**/saas.*.xml" />
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+</bean>
+```
+
+classpath：
+
+- 只会到你的class路径中查找找文件；
+- 有多个classpath路径，并同时加载多个classpath路径的情况下，只会从第一个classpath中加载。
+
+classpath*：
+
+- 不仅包含class路径，还包括jar文件中（class路径）进行查找；
+- 有多个classpath路径，并同时加载多个classpath路径的情况下，会从所有的classpath中加载；
+- 用classpath*:需要遍历所有的classpath，所以加载速度是很慢的；因此，在规划的时候，应该尽可能规划好资源文件所在的路径，尽量避免使用classpath*。
+
+#### 5.4 NoSQL
 
