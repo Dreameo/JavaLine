@@ -30,9 +30,9 @@
 
 
 
+![image-20220411230057305](https://raw.githubusercontent.com/Dreameo/JavaLine/master/10_LeetCode/imgs/leetcode_215.png)
 
 
-![image-20220411230057305](F:\开发\10_刷题\LeetCode\面试高频算法题目.assets\image-20220411230057305.png)
 
 方法二：快速排序
 
@@ -364,7 +364,7 @@ public class Solution {
 
 给你链表的头结点 `head` ，请将其按 **升序** 排列并返回 **排序后的链表** 。
 
-![image-20220412082034388](F:\开发\10_刷题\LeetCode\面试高频算法题目.assets\image-20220412082034388.png)
+![image-20220412082034388](https://raw.githubusercontent.com/Dreameo/JavaLine/master/10_LeetCode/imgs/LeetCode_148.png)
 
 **进阶：**你可以在 `O(n log n)` 时间复杂度和常数级空间复杂度下，对链表进行排序吗？
 
