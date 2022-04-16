@@ -276,7 +276,7 @@ public class Solution {
             for(int k = arr.length/2 - 1;k>=0;k--){
                 adjustHeap(arr,k,arr.length);
             }
-    
+      
             //排序 交换+调整
             int temp =0;
             for (int i = arr.length-1; i >= 0; i--) {
@@ -286,7 +286,7 @@ public class Solution {
                 adjustHeap(arr,0,i);
             }
         }
-    
+      
         /**
          *
          * @param arr 待调整数组
@@ -596,3 +596,128 @@ public class LRUCache {
 
 ## 动态规划
 
+
+
+
+
+## 滑动窗口
+
+### [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长子串** 的长度。
+
+**示例 1:**
+
+```
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+```
+
+**示例 2:**
+
+```
+输入: s = "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+```
+
+**示例 3:**
+
+```
+输入: s = "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+```
+
+思路
+
+标签：`滑动窗口`
+
+- 暴力解法时间复杂度较高，会达到 O(n^2)，故而采取滑动窗口的方法降低时间复杂度
+- 定义一个 map 数据结构存储 (k, v)，其中 key 值为字符，value 值为字符位置 +1，加 1 表示从字符位置后一个才开始不重复
+- 我们定义不重复子串的开始位置为 start，结束位置为 end
+- 随着 end 不断遍历向后，会遇到与 [start, end] 区间内字符相同的情况，此时将字符作为 key 值，获取其 value 值，并更新 start，此时 [start, end] 区间内不存在重复字符
+- 无论是否更新 start，都会更新其 map 数据结构和结果 ans
+- 时间复杂度：O(n)
+
+```java
+class Solution {
+    /**
+     * map (k, v)，其中 key 值为字符，value 值为字符位置;
+     */
+    public int lengthOfLongestSubstring(String s) {
+        int length = s.length();
+        int max = 0;
+
+        Map<Character, Integer> map = new HashMap<>();
+        for(int start = 0, end = 0; end < length; end++){
+            char element = s.charAt(end);
+            if(map.containsKey(element)){
+                start = Math.max(map.get(element) + 1, start); //map.get()的地方进行+1操作,如果不取最大值，start有时候会跑回前面去，如abba
+            }
+            max = Math.max(max, end - start + 1);
+            map.put(element, end);
+        }
+        return max;
+    }
+}
+```
+
+1. start不动，end向后移动
+2. 当end遇到重复字符，start应该放在上一个重复字符的位置的后一位，同时记录最长的长度
+3. 怎样判断是否遇到重复字符，且怎么知道上一个重复字符的位置？--用哈希字典的key来判断是否重复，用value来记录该字符的下一个不重复的位置。
+
+
+
+### [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+
+给定一个含有 `n` 个正整数的数组和一个正整数 `target` **。**
+
+找出该数组中满足其和 `≥ target` 的长度最小的 **连续子数组** `[numsl, numsl+1, ..., numsr-1, numsr]`，并返回其长度**。**如果不存在符合条件的子数组，返回 `0` 。
+
+**实例1**
+
+```java
+输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+```
+
+**示例 2：**
+
+```java
+输入：target = 4, nums = [1,4,4]
+输出：1
+```
+
+**实例3**
+
+```java
+输入：target = 4, nums = [1,4,4]
+输出：1
+```
+
+
+
+```java
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+        int minLen = Integer.MAX_VALUE;
+        int sum = 0;
+        for(int left = 0, right = 0; right < nums.length; right++) {
+            sum += nums[right];
+
+            while(sum >= target) {
+                int subLen = right - left + 1; // 子串长度
+                minLen = subLen < minLen ? subLen : minLen;
+                sum -= nums[left++]; // 缩小 窗口
+            }
+        }
+        return minLen == Integer.MAX_VALUE ? 0 : minLen;
+    }
+}
+```
+
+- 如果你已经实现 `O(n)` 时间复杂度的解法, 请尝试设计一个 `O(n log(n))` 时间复杂度的解法。
