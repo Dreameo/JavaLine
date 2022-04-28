@@ -74,6 +74,12 @@ hashcode不等，两个对象一定不等
 
 由于为了提高程序的效率才实现了hashcode方法，先进行hashcode的比较，如果不同，那没就不必在进行equals的比较了，这样就大大减少了equals比较的次数，这对比需要比较的数量很大的效率提高是很明显的。
 
+### ArrayList源码分析
+https://blog.csdn.net/Drink_23/article/details/108720801?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5.pc_relevant_default&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5.pc_relevant_default&utm_relevant_index=10
+ArrayList在不指定容量的情况下创建出来的 ArrayList 是一个 [] 空数组，当这种 ArrayList 被添加数据时，会直接将内部数组的大小扩容至默认的容量大小 10（jdk8），如果指定容量大小为 1，扩容之后会是 2，其他的普遍扩容，elementData 的容量都是原来的 1.5 倍大小，
+对于一些比较大的 ArrayList ，在扩容的时候，也进行了适当的限制，减小了由于数组过大而引发 OOM 出现的概率；
+
+
 
 
 
