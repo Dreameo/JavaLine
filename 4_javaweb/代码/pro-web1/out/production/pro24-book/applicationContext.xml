@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--<!DOCTYPE beans [-->
+<!--        <!ELEMENT beans (bean*)>-->
+<!--        <!ELEMENT bean (property*)>-->
+<!--        <!ELEMENT property (#PCDATA)>-->
+
+<!--        <!ATTLIST bean id ID #REQUIRED>-->
+<!--        <!ATTLIST bean class CDATA #IMPLIED>-->
+<!--        <!ATTLIST property name CDATA #IMPLIED>-->
+<!--        <!ATTLIST property ref IDREF #IMPLIED>-->
+<!--        ]>-->
+<beans>
+    <!--pageController-->
+    <bean id="page" class="com.yfh.myssm.myspringmvc.PageController"></bean>
+
+    <!--dao-->
+    <bean id="userDAO" class="com.yfh.book.dao.impl.UserDAOImpl"></bean>
+    <bean id="bookDAO" class="com.yfh.book.dao.impl.BookDAOImpl"></bean>
+    <bean id="cartItemDAO" class="com.yfh.book.dao.impl.CartItemDAOImpl"></bean>
+    <bean id="orderDAO" class="com.yfh.book.dao.impl.OrderDAOImpl"></bean>
+    <bean id="orderItemDAO" class="com.yfh.book.dao.impl.OrderItemDAOImpl"></bean>
+
+
+    <!--service-->
+    <bean id="userService" class="com.yfh.book.service.impl.UserServiceImpl">
+        <property name="userDAO" ref="userDAO"></property>
+    </bean>
+
+    <bean id="bookService" class="com.yfh.book.service.impl.BookServiceImpl">
+        <property name="bookDAO" ref="bookDAO"></property>
+    </bean>
+
+    <bean id="cartService" class="com.yfh.book.service.impl.CartServiceImpl">
+        <property name="cartItemDAO" ref="cartItemDAO"></property>
+        <property name="bookService" ref="bookService"></property>
+    </bean>
+
+    <bean id="orderService" class="com.yfh.book.service.impl.OrderServiceImpl">
+        <property name="orderDAO" ref="orderDAO"></property>
+        <property name="orderItemService" ref="orderItemService"></property>
+        <property name="cartService" ref="cartService"></property>
+    </bean>
+
+    <bean id="orderItemService" class="com.yfh.book.service.impl.OrderItemServiceImpl">
+        <property name="orderItemDAO" ref="orderItemDAO"></property>
+    </bean>
+
+
+
+    <!--controller-->
+    <bean id="user" class="com.yfh.book.controller.UserController">
+        <property name="userService" ref="userService"></property>
+        <property name="cartService" ref="cartService"></property>
+    </bean>
+
+    <bean id="book" class="com.yfh.book.controller.BookController">
+        <property name="bookService" ref="bookService"></property>
+    </bean>
+
+    <bean id="cart" class="com.yfh.book.controller.CartController">
+        <property name="cartService" ref="cartService"></property>
+    </bean>
+
+    <bean id="order" class="com.yfh.book.controller.OrderController">
+        <property name="orderService" ref="orderService"></property>
+    </bean>
+
+
+</beans>
+
+
+
+
+        <!--
+        HTML: 超文本标记语言
+        XML：可扩展的标记语言
+        HTML是XML的一个子集
+
+        XML需要包含的三个部分
+        （1）XML声明：而且声明必须在第一行
+        （2）DTD文档类型定义
+        （3）XML正文
+
+        -->

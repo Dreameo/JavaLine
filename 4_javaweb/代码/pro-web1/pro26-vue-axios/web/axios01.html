@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="script/vue.js"></script>
+    <script type="text/javascript" src="script/axios.min.js"></script>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            var vue = new Vue({
+                el: "#app",
+                data:{},
+                methods:{
+                    commonParam:function () {
+                        axios({
+                            method:"POST",
+                            url:"axios01.do",
+                            params:{
+                                "username":"tom",
+                                "password":"dxddd"
+                            }
+                        }).then(function (response) {
+                            console.log(response);
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                }
+            });
+        }
+
+        // axios({
+        //     "method":"post",
+        //     "url":"/demo/AjaxServlet?method=commonParam",
+        //     "params":{
+        //         "userName":"tom",
+        //         "userPwd":"123456"
+        //     }
+        // })
+
+    </script>
+</head>
+<body>
+<div id="app">
+    <button @click="commonParam">普通请求参数</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!--<!DOCTYPE html>-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{css/common.css}">
+    <link rel="stylesheet" th:href="@{css/top.css}">
+</head>
+<body>
+    <div id="top_title" >欢迎来到MyZone</div>
+    <div id="top_link_div" >
+        <span th:text="|欢迎来到 ${session.friend.getNickName()} 空间|">欢迎进入Jim1的空间！</span>
+
+        <span th:if="${session.UserBasic.id != session.friend.id}">
+            <a th:href="@{|/user.do?operation=friend&id=${session.UserBasic.id}|}" target="_top">返回自己的空间</a></span>
+    </div>
+</body>
+</html>

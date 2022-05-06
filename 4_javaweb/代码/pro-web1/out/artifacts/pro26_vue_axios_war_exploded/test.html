@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="script/vue.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var vue = new Vue({
+                "el": "#app",
+                data:{
+                    "vvv" : "vvvvvvv",
+                    msg : "hellowordl"
+                }
+
+
+            });
+        }
+
+    </script>
+
+</head>
+<body>
+<div id="app">
+    {{vvv}}
+    <p>{{msg}}</p>
+    <input type="text" name="name" v-bind="vvv">
+</div>
+
+
+</body>
+</html>

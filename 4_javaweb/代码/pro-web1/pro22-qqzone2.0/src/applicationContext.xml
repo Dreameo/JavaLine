@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--<!DOCTYPE beans [-->
+<!--        <!ELEMENT beans (bean*)>-->
+<!--        <!ELEMENT bean (property*)>-->
+<!--        <!ELEMENT property (#PCDATA)>-->
+
+<!--        <!ATTLIST bean id ID #REQUIRED>-->
+<!--        <!ATTLIST bean class CDATA #IMPLIED>-->
+<!--        <!ATTLIST property name CDATA #IMPLIED>-->
+<!--        <!ATTLIST property ref IDREF #IMPLIED>-->
+<!--        ]>-->
+<beans>
+    <bean id="userBasicDAO" class="com.yfh.qqzone.dao.impl.UserBasicDAOImpl"></bean>
+    <bean id="topicDAO" class="com.yfh.qqzone.dao.impl.TopicDAOImpl"></bean>
+
+
+    <bean id="userBasicService" class="com.yfh.qqzone.service.impl.UserBasicServiceImpl">
+        <property name="userBasicDAO" ref="userBasicDAO"></property>
+    </bean>
+
+
+
+    <bean id="user" class="com.yfh.qqzone.controller.UserController">
+        <property name="userBasicService" ref="userBasicService"></property>
+        <property name="topicService" ref="topicService"></property>
+    </bean>
+
+    <bean id="page" class="com.yfh.myssm.myspringmvc.PageController"></bean>
+    <bean id="hostReplyDAO" class="com.yfh.qqzone.dao.impl.HostReplyDAOImpl"></bean>
+
+    <bean id="replyDAO" class="com.yfh.qqzone.dao.impl.ReplyDAOImpl"></bean>
+
+
+    <bean id="hostReplyService" class="com.yfh.qqzone.service.impl.HostReplyServiceImpl">
+        <property name="hostReplyDAO" ref="hostReplyDAO"></property>
+    </bean>
+    <bean id="replyService" class="com.yfh.qqzone.service.impl.ReplyServiceImpl">
+        <property name="replyDAO" ref="replyDAO"></property>
+        <property name="hostReplyService" ref="hostReplyService"></property>
+        <property name="userBasicService" ref="userBasicService"></property>
+    </bean>
+
+
+
+    <bean id="topicService" class="com.yfh.qqzone.service.impl.TopicServiceImpl">
+        <property name="topicDAO" ref="topicDAO"></property>
+        <property name="replyService" ref="replyService"></property>
+        <property name="userBasicService" ref="userBasicService"></property>
+    </bean>
+
+    <bean id="topic" class="com.yfh.qqzone.controller.TopicController">
+        <property name="topicService" ref="topicService"></property>
+    </bean>
+
+    <bean id="reply" class="com.yfh.qqzone.controller.ReplyController">
+        <property name="replyService" ref="replyService"></property>
+    </bean>
+
+
+</beans>
+
+
+
+
+        <!--
+        HTML: 超文本标记语言
+        XML：可扩展的标记语言
+        HTML是XML的一个子集
+
+        XML需要包含的三个部分
+        （1）XML声明：而且声明必须在第一行
+        （2）DTD文档类型定义
+        （3）XML正文
+
+        -->
