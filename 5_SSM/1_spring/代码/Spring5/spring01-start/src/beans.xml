@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="user" class="com.yfh.beans.User"></bean>
+
+<!--    set方法属性注入：
+        1.创建对象-->
+    <bean id="bookSet" class="com.yfh.beans.BookSet">
+        <!--2. 注入属性
+            name： 类中的属性名
+            value： 向属性中注入的值
+        -->
+        <property name="name" value="易经经"></property>
+    </bean>
+
+
+<!--    有参构造属性诸如-->
+    <bean id="bookArgs" class="com.yfh.beans.BookArgs">
+        <constructor-arg name="name" value="鲁滨逊漂流记"></constructor-arg>
+        <constructor-arg name="author" value="不知道"></constructor-arg>
+    </bean>
+
+</beans>

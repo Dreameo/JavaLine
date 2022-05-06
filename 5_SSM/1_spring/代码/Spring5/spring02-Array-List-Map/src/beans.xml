@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="stu" class="com.yfh.beans.Student">
+    <!--    数组属性注入-->
+        <property name="course">
+            <array>
+                <value>java课程</value>
+                <value>C语言课程</value>
+                <value>数据结构课程</value>
+            </array>
+        </property>
+
+    <!--    list属性注入-->
+        <property name="list">
+            <list>
+                <value>小三</value>
+                <value>小明</value>
+            </list>
+        </property>
+
+    <!--    map属性注入 -->
+        <property name="map">
+                <map>
+                    <entry key="JAVA" value="90"></entry>
+                    <entry key="PHP" value="80"></entry>
+                </map>
+        </property>
+
+    <!--    set属性注入-->
+        <property name="set">
+            <set>
+                <value>小明</value>
+                <value>小红</value>
+            </set>
+        </property>
+
+
+    <!--    list要对其进行抽取，然后bean的属性中用ref引用
+    如果集合中是对象，不是普通数据类型，那么我们使用ref bean内部属性-->
+    </bean>
+</beans>

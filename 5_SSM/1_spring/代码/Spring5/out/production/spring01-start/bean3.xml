@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--内部bean-->
+    <bean id="emp" class="com.yfh.beans.Employee">
+    <!--    1. 先设置两个普通属性-->
+        <property name="ename" value="lucy"></property>
+        <property name="gender" value="男"></property>
+    <!--    2. 设置对象属性- 可以用外部bean的方式，ref引入-->
+        <property name="dept">
+            <bean id="dept" class="com.yfh.beans.Dept">
+                <property name="deptName" value="安保部"></property>
+            </bean>
+        </property>
+    </bean>
+</beans>
